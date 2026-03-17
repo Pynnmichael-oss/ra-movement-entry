@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PDF Processor — RA Movement Entry</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0f0f0f;
+      --surface:   #1a1a1a;
+      --border:    #2e2e2e;
+      --amber:     #f59e0b;
+      --amber-dim: #92600a;
+      --text:      #d4d4d4;
+      --text-dim:  #737373;
+      --danger:    #ef4444;
+      --success:   #22c55e;
+      --mono:      'IBM Plex Mono', monospace;
+      --sans:      'IBM Plex Sans', sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--surface);
+      border-bottom: 2px solid var(--amber);
+      padding: 12px 24px;
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+    }
+    header h1 {
+      font-family: var(--mono);
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--amber);
+      letter-spacing: 0.04em;
+    }
+    header span {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+    header nav {
+      margin-left: auto;
+      display: flex;
+      gap: 2px;
+      align-items: center;
+    }
+    header nav a {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-dim);
+      text-decoration: none;
+      padding: 4px 10px;
+      border: 1px solid transparent;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    header nav a:hover  { color: var(--text); border-color: var(--border); }
+    header nav a.active { color: var(--amber); border-color: var(--amber-dim); }
+
+    /* ── Layout ── */
+    main {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 32px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 24px;
+    }
+    .section-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── API Key ── */
+    .api-key-row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+    .field { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+    .field label {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    input, select {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      padding: 8px 10px;
+      outline: none;
+      width: 100%;
+    }
+    input:focus, select:focus { border-color: var(--amber); }
+
+    /* ── Buttons ── */
+    button {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 8px 16px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+    button:hover:not(:disabled) { border-color: var(--amber); color: var(--amber); }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-primary {
+      background: var(--amber);
+      border-color: var(--amber);
+      color: #000;
+      font-weight: 600;
+    }
+    .btn-primary:hover:not(:disabled) { background: #d97706; border-color: #d97706; color: #000; }
+
+    #api-key-status { font-family: var(--mono); font-size: 12px; color: var(--text-dim); }
+    #api-key-status.saved  { color: var(--success); }
+    #api-key-status.error  { color: var(--danger); }
+
+    /* ── Drop zone ── */
+    #drop-zone {
+      border: 2px dashed var(--border);
+      padding: 40px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.15s;
+      position: relative;
+    }
+    #drop-zone:hover, #drop-zone.drag-over { border-color: var(--amber); }
+    #drop-zone input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .drop-icon  { font-size: 36px; margin-bottom: 10px; }
+    .drop-title { font-family: var(--mono); font-size: 14px; color: var(--text); margin-bottom: 6px; }
+    .drop-sub   { font-size: 12px; color: var(--text-dim); }
+
+    #file-selected {
+      display: none;
+      margin-top: 12px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--success);
+    }
+
+    .parse-row {
+      margin-top: 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    #parse-status {
+      font-family: var(--mono);
+      font-size: 12px;
+    }
+    #parse-status.loading { color: var(--amber); }
+    #parse-status.error   { color: var(--danger); }
+    #parse-status.done    { color: var(--success); }
+
+    /* ── Preview ── */
+    #preview-section { display: none; }
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .preview-field { display: flex; flex-direction: column; gap: 4px; }
+    .preview-field .pf-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .preview-field .pf-value {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--text);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 7px 10px;
+    }
+    .preview-field .pf-value.empty { color: var(--text-dim); font-style: italic; }
+    .preview-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    #preview-error {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--danger);
+      margin-left: 8px;
+    }
+
+    /* ── Success ── */
+    #success-section {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--success);
+      padding: 24px;
+    }
+    .success-title {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--success);
+      margin-bottom: 8px;
+    }
+    #success-detail {
+      font-size: 13px;
+      color: var(--text-dim);
+      margin-bottom: 16px;
+    }
+    .success-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .link-primary {
+      background: var(--amber);
+      border: 1px solid var(--amber);
+      color: #000;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px 16px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .link-ghost {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 8px 16px;
+      text-decoration: none;
+    }
+    .link-ghost:hover { border-color: var(--amber); color: var(--amber); }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>RA Movement Entry</h1>
+  <span class="subtitle">RightAngle ETRM Import Tool</span>
+  <nav>
+    <a href="index.html">Manual Entry</a>
+    <a href="email-processor.html" class="active">PDF Processor</a>
+    <a href="walkthrough.html">Guide</a>
+  </nav>
+  <span id="header-user" style="font-family:var(--mono); font-size:12px; color:var(--text-dim);"></span>
+</header>
+
+<main>
+
+  <!-- ── API Key ── -->
+  <section class="card" id="api-key-section">
+    <div class="section-label">Anthropic API Key</div>
+    <div class="api-key-row">
+      <div class="field" style="max-width:560px;">
+        <label for="api-key-input">API Key</label>
+        <input type="password" id="api-key-input" placeholder="sk-ant-api03-..." autocomplete="off" />
+      </div>
+      <button class="btn-primary" id="btn-save-key">Save Key</button>
+      <span id="api-key-status"></span>
+    </div>
+  </section>
+
+  <!-- ── Upload ── -->
+  <section class="card" id="upload-section">
+    <div class="section-label">Upload Petroleum Statement (PDF)</div>
+
+    <div id="drop-zone">
+      <input type="file" id="file-input" accept="application/pdf" />
+      <div class="drop-icon">&#128196;</div>
+      <div class="drop-title">Drop PDF here or click to browse</div>
+      <div class="drop-sub">Petroleum statements, delivery tickets, invoices</div>
+    </div>
+    <div id="file-selected"></div>
+
+    <div class="parse-row">
+      <button id="btn-parse" disabled>Parse PDF</button>
+      <span id="parse-status"></span>
+    </div>
+  </section>
+
+  <!-- ── Preview ── -->
+  <section class="card" id="preview-section">
+    <div class="section-label">Parsed Movement — Review Before Saving</div>
+    <div class="preview-grid" id="preview-grid"></div>
+    <div class="preview-actions">
+      <button class="btn-primary" id="btn-save-movement">Save to Movements</button>
+      <button id="btn-discard">Discard</button>
+      <span id="preview-error"></span>
+    </div>
+  </section>
+
+  <!-- ── Success ── -->
+  <section id="success-section">
+    <div class="success-title">&#10003; Movement Saved</div>
+    <div id="success-detail"></div>
+    <div class="success-actions">
+      <a href="index.html" class="link-primary">View All Movements</a>
+      <a href="email-processor.html" class="link-ghost">Parse Another PDF</a>
+    </div>
+  </section>
+
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script>
+// ── Firebase Config ───────────────────────────────────────────────────────────
+firebase.initializeApp({
+  apiKey:            'AIzaSyBk5oxlIH3jhFPdkGFUrbMBv05wO2gpdeg',
+  authDomain:        'ra-movement-entry.firebaseapp.com',
+  projectId:         'ra-movement-entry',
+  storageBucket:     'ra-movement-entry.firebasestorage.app',
+  messagingSenderId: '718004979233',
+  appId:             '1:718004979233:web:1b2e317c0d5121a0a70560',
+});
+const db   = firebase.firestore();
+const COLL = db.collection('ra_movements');
+
+async function dbCreate(mov) {
+  const ref = await COLL.add(mov);
+  return { id: ref.id, ...mov };
+}
+
+// ── Constants ─────────────────────────────────────────────────────────────────
+const LS_USERNAME = 'ra_username';
+const LS_API_KEY  = 'ra_api_key';
+const CLAUDE_MODEL = 'claude-sonnet-4-20250514';
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let selectedFile = null;
+let parsedData   = null;
+
+// ── Username ──────────────────────────────────────────────────────────────────
+let username = localStorage.getItem(LS_USERNAME);
+if (!username) {
+  username = prompt('Welcome! Please enter your name:') || 'Unknown';
+  localStorage.setItem(LS_USERNAME, username);
+}
+document.getElementById('header-user').textContent = username;
+
+// ── API Key ───────────────────────────────────────────────────────────────────
+const apiKeyInput  = document.getElementById('api-key-input');
+const btnSaveKey   = document.getElementById('btn-save-key');
+const apiKeyStatus = document.getElementById('api-key-status');
+
+function loadApiKey() {
+  const stored = localStorage.getItem(LS_API_KEY) || '';
+  apiKeyInput.value = stored;
+  if (stored) {
+    apiKeyStatus.textContent = 'Key loaded';
+    apiKeyStatus.className = 'saved';
+  }
+}
+
+btnSaveKey.addEventListener('click', () => {
+  const key = apiKeyInput.value.trim();
+  if (!key.startsWith('sk-ant-')) {
+    apiKeyStatus.textContent = 'Invalid key format';
+    apiKeyStatus.className = 'error';
+    return;
+  }
+  localStorage.setItem(LS_API_KEY, key);
+  apiKeyStatus.textContent = 'Saved';
+  apiKeyStatus.className = 'saved';
+});
+
+// ── File Upload ───────────────────────────────────────────────────────────────
+const fileInput    = document.getElementById('file-input');
+const dropZone     = document.getElementById('drop-zone');
+const fileSelected = document.getElementById('file-selected');
+const btnParse     = document.getElementById('btn-parse');
+
+fileInput.addEventListener('change', () => {
+  if (fileInput.files[0]) selectFile(fileInput.files[0]);
+});
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', ()  => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if (f && f.type === 'application/pdf') selectFile(f);
+});
+
+function selectFile(f) {
+  selectedFile = f;
+  fileSelected.textContent = '&#10003; ' + f.name + ' (' + (f.size / 1024).toFixed(0) + ' KB)';
+  fileSelected.style.display = 'block';
+  btnParse.disabled = false;
+  parseStatus('', '');
+  hidePreview();
+}
+
+function parseStatus(msg, cls) {
+  const el = document.getElementById('parse-status');
+  el.textContent = msg;
+  el.className   = cls;
+}
+
+// ── Parse ─────────────────────────────────────────────────────────────────────
+btnParse.addEventListener('click', async () => {
+  const apiKey = localStorage.getItem(LS_API_KEY) || apiKeyInput.value.trim();
+  if (!apiKey) {
+    parseStatus('Enter and save your Anthropic API key first.', 'error');
+    return;
+  }
+  if (!selectedFile) return;
+
+  btnParse.disabled = true;
+  parseStatus('Reading PDF...', 'loading');
+  hidePreview();
+
+  let base64;
+  try {
+    base64 = await fileToBase64(selectedFile);
+  } catch (err) {
+    parseStatus('Failed to read file: ' + err.message, 'error');
+    btnParse.disabled = false;
+    return;
+  }
+
+  parseStatus('Sending to Claude AI...', 'loading');
+
+  const prompt = `You are parsing a petroleum movement document (delivery ticket, invoice, or statement).
+
+Extract the following fields and return ONLY a JSON object with these exact keys:
+- ExternalDocumentNumber: document or ticket number (string)
+- MovementDate: date and time of the movement in format YYYY-MM-DDTHH:mm (string, use T00:00 if no time given)
+- MovementDocumentDate: document date in format YYYY-MM-DD (string, same as MovementDate date if not separately specified)
+- Location: facility, tank, or location name (string)
+- MovedProduct: product name e.g. Crude Oil, Gasoline, Diesel, Natural Gas (string)
+- NetVolume: numeric volume as a number (no commas or units)
+- DeliveryBA: supplier, carrier, or counterparty name (string)
+
+If a field cannot be found, use null.
+
+Return ONLY the JSON object, no explanation.`;
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key':                        apiKey,
+        'anthropic-version':                '2023-06-01',
+        'anthropic-dangerous-direct-browser-calls': 'true',
+        'content-type':                     'application/json',
+      },
+      body: JSON.stringify({
+        model: CLAUDE_MODEL,
+        max_tokens: 512,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
+            { type: 'text', text: prompt },
+          ],
+        }],
+      }),
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err?.error?.message || `API error ${resp.status}`);
+    }
+
+    const result = await resp.json();
+    const text   = result.content?.[0]?.text || '';
+
+    // Extract JSON from response
+    const match = text.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error('No JSON found in response');
+
+    parsedData = JSON.parse(match[0]);
+    parseStatus('Parsed successfully.', 'done');
+    showPreview(parsedData);
+  } catch (err) {
+    parseStatus('Error: ' + err.message, 'error');
+    btnParse.disabled = false;
+  }
+});
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload  = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// ── Preview ───────────────────────────────────────────────────────────────────
+const PREVIEW_FIELDS = [
+  { key: 'ExternalDocumentNumber', label: 'ExternalDocumentNumber' },
+  { key: 'MovementDate',           label: 'MovementDate' },
+  { key: 'MovementDocumentDate',   label: 'MovementDocumentDate' },
+  { key: 'Location',               label: 'Location' },
+  { key: 'MovedProduct',           label: 'MovedProduct' },
+  { key: 'NetVolume',              label: 'NetVolume' },
+  { key: 'DeliveryBA',             label: 'DeliveryBA' },
+];
+
+function showPreview(data) {
+  const grid = document.getElementById('preview-grid');
+  grid.innerHTML = '';
+  PREVIEW_FIELDS.forEach(f => {
+    const div = document.createElement('div');
+    div.className = 'preview-field';
+    const lbl = document.createElement('div');
+    lbl.className   = 'pf-label';
+    lbl.textContent = f.label;
+    const val = document.createElement('div');
+    val.className   = 'pf-value' + (data[f.key] == null ? ' empty' : '');
+    val.textContent = data[f.key] != null ? String(data[f.key]) : '(not found)';
+    div.appendChild(lbl);
+    div.appendChild(val);
+    grid.appendChild(div);
+  });
+  document.getElementById('preview-section').style.display = 'block';
+  document.getElementById('preview-error').textContent = '';
+  document.getElementById('preview-section').scrollIntoView({ behavior: 'smooth' });
+}
+
+function hidePreview() {
+  document.getElementById('preview-section').style.display = 'none';
+  parsedData = null;
+}
+
+document.getElementById('btn-discard').addEventListener('click', () => {
+  hidePreview();
+  parseStatus('', '');
+  btnParse.disabled = !selectedFile;
+});
+
+// ── Save ──────────────────────────────────────────────────────────────────────
+document.getElementById('btn-save-movement').addEventListener('click', async () => {
+  if (!parsedData) return;
+
+  const errEl = document.getElementById('preview-error');
+  errEl.textContent = '';
+
+  const now = new Date().toISOString();
+  const mov = {
+    ExternalDocumentNumber: parsedData.ExternalDocumentNumber || null,
+    MovementDate:           parsedData.MovementDate           || null,
+    MovementDocumentDate:   parsedData.MovementDocumentDate   || null,
+    Location:               parsedData.Location               || null,
+    MovedProduct:           parsedData.MovedProduct           || null,
+    NetVolume:              parsedData.NetVolume != null ? parseFloat(parsedData.NetVolume) : null,
+    VolumeUOM:              'bbl',
+    Type:                   'Delivery',
+    DeliveryBA:             parsedData.DeliveryBA             || null,
+    status:                 'pending',
+    enteredBy:              username,
+    enteredAt:              now,
+    exportBatch:            null,
+    sentAt:                 null,
+  };
+
+  const btn = document.getElementById('btn-save-movement');
+  btn.disabled    = true;
+  btn.textContent = 'Saving...';
+
+  try {
+    await dbCreate(mov);
+
+    hidePreview();
+    document.getElementById('success-detail').textContent =
+      'Movement "' + (mov.ExternalDocumentNumber || '(no doc number)') + '" saved as pending.';
+    document.getElementById('success-section').style.display = 'block';
+    document.getElementById('success-section').scrollIntoView({ behavior: 'smooth' });
+
+    selectedFile = null;
+    fileInput.value = '';
+    fileSelected.style.display = 'none';
+    btnParse.disabled = true;
+    parseStatus('', '');
+  } catch (err) {
+    errEl.textContent = 'Error saving: ' + err.message;
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = 'Save to Movements';
+  }
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+loadApiKey();
+</script>
+</body>
+</html>
