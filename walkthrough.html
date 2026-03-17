@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Guide — RA Movement Entry</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0f0f0f;
+      --surface:   #1a1a1a;
+      --border:    #2e2e2e;
+      --amber:     #f59e0b;
+      --amber-dim: #92600a;
+      --text:      #d4d4d4;
+      --text-dim:  #737373;
+      --danger:    #ef4444;
+      --success:   #22c55e;
+      --mono:      'IBM Plex Mono', monospace;
+      --sans:      'IBM Plex Sans', sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 14px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--surface);
+      border-bottom: 2px solid var(--amber);
+      padding: 12px 24px;
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    header h1 {
+      font-family: var(--mono);
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--amber);
+      letter-spacing: 0.04em;
+    }
+    header .subtitle {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+    header nav {
+      margin-left: auto;
+      display: flex;
+      gap: 2px;
+      align-items: center;
+    }
+    header nav a {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--text-dim);
+      padding: 5px 12px;
+      border: 1px solid transparent;
+      border-radius: 2px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    header nav a:hover { color: var(--text); border-color: var(--border); }
+    header nav a.active { color: var(--amber); border-color: var(--amber-dim); }
+
+    /* ── Layout ── */
+    .page-wrap {
+      display: flex;
+      gap: 0;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+
+    /* ── Sidebar TOC ── */
+    .toc {
+      width: 200px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 72px;
+      align-self: flex-start;
+      padding-right: 24px;
+    }
+    .toc-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 12px;
+    }
+    .toc ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .toc a {
+      display: block;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-dim);
+      text-decoration: none;
+      padding: 4px 8px;
+      border-left: 2px solid transparent;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .toc a:hover { color: var(--text); border-left-color: var(--border); }
+    .toc a.sub { padding-left: 18px; font-size: 10px; }
+
+    /* ── Main content ── */
+    .content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* ── Page title ── */
+    .page-title {
+      margin-bottom: 32px;
+    }
+    .page-title h2 {
+      font-family: var(--mono);
+      font-size: 22px;
+      font-weight: 500;
+      color: var(--amber);
+      letter-spacing: 0.02em;
+      margin-bottom: 8px;
+    }
+    .page-title p {
+      font-size: 14px;
+      color: var(--text-dim);
+      max-width: 560px;
+    }
+
+    /* ── Section ── */
+    .section {
+      margin-bottom: 40px;
+      scroll-margin-top: 80px;
+    }
+    .section-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--amber);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 6px;
+      margin-bottom: 20px;
+    }
+    .section h3 {
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 10px;
+      margin-top: 20px;
+    }
+    .section h3:first-child { margin-top: 0; }
+    .section p {
+      color: var(--text-dim);
+      margin-bottom: 10px;
+      max-width: 640px;
+    }
+    .section p strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    /* ── Steps ── */
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 660px;
+    }
+    .step {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .step-num {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      color: #0f0f0f;
+      background: var(--amber);
+      border-radius: 2px;
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .step-body {
+      flex: 1;
+    }
+    .step-body strong {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text);
+      display: block;
+      margin-bottom: 3px;
+    }
+    .step-body p {
+      font-size: 13px;
+      color: var(--text-dim);
+      margin: 0;
+      max-width: none;
+    }
+
+    /* ── Info card ── */
+    .info-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--amber);
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      max-width: 660px;
+    }
+    .info-card.warn {
+      border-left-color: var(--danger);
+    }
+    .info-card.tip {
+      border-left-color: var(--success);
+    }
+    .info-card .card-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 5px;
+    }
+    .info-card.warn .card-label { color: var(--danger); }
+    .info-card.tip  .card-label { color: var(--success); }
+    .info-card p {
+      font-size: 13px;
+      color: var(--text-dim);
+      margin: 0;
+      max-width: none;
+    }
+    .info-card p strong { color: var(--text); }
+
+    /* ── Field table ── */
+    .field-table {
+      width: 100%;
+      max-width: 660px;
+      border-collapse: collapse;
+      margin-bottom: 16px;
+    }
+    .field-table thead th {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--amber);
+      text-align: left;
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--border);
+      background: #111;
+    }
+    .field-table tbody td {
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      color: var(--text-dim);
+    }
+    .field-table tbody td:first-child { color: var(--text); }
+    .field-table tbody tr:hover td { background: #1c1c1c; }
+    .req {
+      display: inline-block;
+      font-size: 10px;
+      font-family: var(--mono);
+      color: var(--amber);
+      border: 1px solid var(--amber-dim);
+      padding: 1px 5px;
+      border-radius: 2px;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+    .opt {
+      display: inline-block;
+      font-size: 10px;
+      font-family: var(--mono);
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+      padding: 1px 5px;
+      border-radius: 2px;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+
+    /* ── Status badges ── */
+    .badge-sent {
+      display: inline-block;
+      background: #222;
+      border: 1px solid #444;
+      color: #737373;
+      font-size: 10px;
+      font-family: var(--mono);
+      letter-spacing: 0.1em;
+      padding: 2px 7px;
+      border-radius: 2px;
+    }
+    .badge-pending {
+      display: inline-block;
+      border: 1px solid var(--amber-dim);
+      color: var(--amber-dim);
+      font-size: 10px;
+      font-family: var(--mono);
+      letter-spacing: 0.1em;
+      padding: 2px 7px;
+      border-radius: 2px;
+    }
+
+    /* ── Divider ── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 36px 0;
+    }
+
+    /* ── CTA row ── */
+    .cta-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .cta-row a {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border-radius: 2px;
+      padding: 8px 18px;
+      transition: background 0.15s;
+    }
+    .cta-row a.primary {
+      background: var(--amber);
+      color: #0f0f0f;
+    }
+    .cta-row a.primary:hover { background: #fbbf24; }
+    .cta-row a.ghost {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+    }
+    .cta-row a.ghost:hover { border-color: var(--text-dim); color: var(--text); }
+
+    /* ── Responsive ── */
+    @media (max-width: 680px) {
+      .toc { display: none; }
+      .page-wrap { padding: 20px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>RA Movement Entry</h1>
+  <span class="subtitle">RightAngle ETRM Import Tool</span>
+  <nav>
+    <a href="index.html">Manual Entry</a>
+    <a href="email-processor.html">PDF Processor</a>
+    <a href="walkthrough.html" class="active">Guide</a>
+  </nav>
+</header>
+
+<div class="page-wrap">
+
+  <!-- ── Sidebar ── -->
+  <aside class="toc">
+    <div class="toc-label">Contents</div>
+    <ul>
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#manual-entry">Manual Entry</a></li>
+      <li><a class="sub" href="#fields">Field Reference</a></li>
+      <li><a href="#pdf-processor">PDF Processor</a></li>
+      <li><a href="#export">Exporting</a></li>
+      <li><a href="#statuses">Row Statuses</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+  </aside>
+
+  <!-- ── Content ── -->
+  <main class="content">
+
+    <div class="page-title">
+      <h2>User Guide</h2>
+      <p>How to enter, review, and export petroleum movement data into RightAngle (ETRM).</p>
+    </div>
+
+    <!-- ── Overview ── -->
+    <section class="section" id="overview">
+      <div class="section-label">Overview</div>
+
+      <p>This tool has two ways to get movements into the system. Use whichever fits the document you have:</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>Manual Entry (index.html)</strong>
+            <p>Type movement data directly into a form. Best for one-off entries or when you already know the field values.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>PDF Processor (email-processor.html)</strong>
+            <p>Upload a petroleum statement or delivery ticket PDF. Claude AI reads the document and pre-fills the fields for you to review before saving.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Export to RightAngle</strong>
+            <p>When your movements look correct, click <strong>Export Pending (.xlsx)</strong> on the Manual Entry page. Download the file and import it into RightAngle.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-card" style="margin-top:20px;">
+        <div class="card-label">Data Storage</div>
+        <p>All movements are saved to a SharePoint list named <strong>RA_Movements</strong>. Data persists across sessions and is visible to all users on the site — no local storage is used.</p>
+      </div>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- ── Manual Entry ── -->
+    <section class="section" id="manual-entry">
+      <div class="section-label">Manual Entry</div>
+
+      <p>Open <strong>index.html</strong> from the SharePoint document library. On first load you will be asked for your name — this is recorded on each movement you create.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>Fill in the required fields</strong>
+            <p>Fields marked with an asterisk (*) must be completed. At minimum: ExternalDocumentNumber, MovementDate, Location, MovedProduct, NetVolume, and VolumeUOM.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>Fill in optional fields as needed</strong>
+            <p>Type, deal numbers, counterparty names, gravity values, and notes can all be added below the divider. Leave anything blank that does not apply.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Click + Add Row</strong>
+            <p>The movement is saved to SharePoint and appears in the table below. The status will be <span class="badge-pending">PENDING</span>.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>Correct mistakes using Edit</strong>
+            <p>Pending rows have an <strong>Edit</strong> button. Click it to open the edit modal, make changes, and save. Once a row is exported it becomes read-only.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <strong>Remove a row using Del</strong>
+            <p>Click <strong>Del</strong> on any pending row to permanently delete it from SharePoint. This cannot be undone.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-card warn" style="margin-top:20px;">
+        <div class="card-label">Important — MovementDate Format</div>
+        <p>Enter the date and time of the physical movement, not today's date. RightAngle uses this to post the movement to the correct accounting period. If you only know the date, set the time to <strong>12:00 AM</strong>.</p>
+      </div>
+
+      <!-- Field reference -->
+      <h3 id="fields">Field Reference</h3>
+      <p>Every field the form accepts and what it maps to in RightAngle:</p>
+
+      <table class="field-table">
+        <thead>
+          <tr>
+            <th>Field</th>
+            <th>Required</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>ExternalDocumentNumber</td>
+            <td><span class="req">Required</span></td>
+            <td>Unique ID for this movement (e.g. invoice number, ticket number). Used to prevent duplicate imports in RightAngle.</td>
+          </tr>
+          <tr>
+            <td>MovementDate</td>
+            <td><span class="req">Required</span></td>
+            <td>Date and time the physical movement occurred. Format: date + time picker.</td>
+          </tr>
+          <tr>
+            <td>Location</td>
+            <td><span class="req">Required</span></td>
+            <td>RightAngle location code or facility name where the movement took place (e.g. <code>TANK-101</code>).</td>
+          </tr>
+          <tr>
+            <td>MovedProduct</td>
+            <td><span class="req">Required</span></td>
+            <td>Product name as it appears in RightAngle (e.g. <code>Crude Oil WTI</code>, <code>Gasoline</code>, <code>Diesel</code>).</td>
+          </tr>
+          <tr>
+            <td>NetVolume</td>
+            <td><span class="req">Required</span></td>
+            <td>Net volume of the movement as a plain number. No commas or units.</td>
+          </tr>
+          <tr>
+            <td>VolumeUOM</td>
+            <td><span class="req">Required</span></td>
+            <td>Unit of measure: <code>bbl</code> (barrels), <code>gal</code> (gallons), or <code>mcf</code> (thousand cubic feet).</td>
+          </tr>
+          <tr>
+            <td>Type</td>
+            <td><span class="opt">Optional</span></td>
+            <td>Movement type: Production, Receipt, Delivery, or Inventory.</td>
+          </tr>
+          <tr>
+            <td>GrossVolume</td>
+            <td><span class="opt">Optional</span></td>
+            <td>Gross volume before temperature/gravity correction.</td>
+          </tr>
+          <tr>
+            <td>SpecificGravity / APIGravity</td>
+            <td><span class="opt">Optional</span></td>
+            <td>Product quality measurements. Leave blank if not on the source document.</td>
+          </tr>
+          <tr>
+            <td>Status</td>
+            <td><span class="opt">Optional</span></td>
+            <td>RightAngle matching status (separate from the app's Pending/Sent status). Often left blank.</td>
+          </tr>
+          <tr>
+            <td>InternalDocumentNumber</td>
+            <td><span class="opt">Optional</span></td>
+            <td>RightAngle internal reference number if known.</td>
+          </tr>
+          <tr>
+            <td>MovementDocumentDate</td>
+            <td><span class="opt">Optional</span></td>
+            <td>Date printed on the source document (may differ from MovementDate).</td>
+          </tr>
+          <tr>
+            <td>ReceiptDealNumber / ReceiptDealDetail / ReceiptBA</td>
+            <td><span class="opt">Optional</span></td>
+            <td>RightAngle deal number, detail line, and business associate for the receipt leg.</td>
+          </tr>
+          <tr>
+            <td>DeliveryDealNumber / DeliveryDealDetail / DeliveryBA</td>
+            <td><span class="opt">Optional</span></td>
+            <td>RightAngle deal number, detail line, and business associate for the delivery leg.</td>
+          </tr>
+          <tr>
+            <td>TaxOrigin / TaxDestination</td>
+            <td><span class="opt">Optional</span></td>
+            <td>Tax jurisdiction codes for the movement origin and destination.</td>
+          </tr>
+          <tr>
+            <td>CarrierBusinessAssociate</td>
+            <td><span class="opt">Optional</span></td>
+            <td>Carrier or pipeline operator moving the product.</td>
+          </tr>
+          <tr>
+            <td>LiftingNumber / ReasonCode</td>
+            <td><span class="opt">Optional</span></td>
+            <td>Supplementary reference fields used by some RightAngle configurations.</td>
+          </tr>
+          <tr>
+            <td>MovementExpenses</td>
+            <td><span class="opt">Optional</span></td>
+            <td>Any associated expenses. Defaults to 0 in the export if left blank.</td>
+          </tr>
+          <tr>
+            <td>Notes</td>
+            <td><span class="opt">Optional</span></td>
+            <td>Free-text notes. Not imported into RightAngle — visible in this tool only.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- ── PDF Processor ── -->
+    <section class="section" id="pdf-processor">
+      <div class="section-label">PDF Processor</div>
+
+      <p>Open <strong>email-processor.html</strong>. This page uses the Claude AI API to read a PDF and extract movement fields automatically.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>Confirm your API key is saved</strong>
+            <p>The Anthropic API key is pre-filled at the top of the page. Click <strong>Save Key</strong> once to store it. You only need to do this the first time you use the page on a new browser.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>Upload your PDF</strong>
+            <p>Drag the file onto the drop zone or click it to browse. Supported files: petroleum statements, delivery tickets, invoices — any PDF with movement data.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Click Parse with Claude</strong>
+            <p>The PDF is sent to Claude AI for reading. This typically takes 5–15 seconds depending on PDF size. A spinner shows while it is processing.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>Review and correct the extracted fields</strong>
+            <p>A form appears with the values Claude found. Check each field — AI extraction is accurate but not perfect. Correct anything that looks wrong before saving. Fields marked <strong>FIXED</strong> (VolumeUOM and Type) are hardcoded and cannot be changed here.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <strong>Click Save to Movements</strong>
+            <p>The movement is posted to SharePoint and a confirmation message appears. Click <strong>View All Movements</strong> to return to the main table.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-card tip" style="margin-top:20px;">
+        <div class="card-label">Tip — What Claude Extracts</div>
+        <p>Claude looks for: invoice/document number, document date, delivery location, product name, billed volume, and the counterparty or supplier name. Fields that cannot be found on the PDF are left blank for you to fill in manually.</p>
+      </div>
+
+      <div class="info-card warn" style="margin-top:12px;">
+        <div class="card-label">Note — PDF Processor Defaults</div>
+        <p>Movements created via the PDF Processor are always saved with <strong>VolumeUOM = bbl</strong> and <strong>Type = Delivery</strong>. If the movement has a different unit or type, edit the row on the Manual Entry page after saving.</p>
+      </div>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- ── Export ── -->
+    <section class="section" id="export">
+      <div class="section-label">Exporting to RightAngle</div>
+
+      <p>Exporting is done from the <strong>Manual Entry page (index.html)</strong>. The export button is only active when at least one pending movement exists.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>Review all pending rows</strong>
+            <p>Check that every <span class="badge-pending">PENDING</span> row is correct. Once exported, rows become read-only and cannot be edited or deleted.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>Click Export Pending (.xlsx)</strong>
+            <p>A file named <code>RA_movements_YYYY-MM-DD.xlsx</code> downloads immediately. All pending rows are included. The app then marks them as <span class="badge-sent">SENT</span> in SharePoint.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Import the file into RightAngle</strong>
+            <p>In RightAngle, go to the movement import screen and upload the downloaded .xlsx file. The file contains XML data in the format RightAngle expects — do not open or re-save it in Excel first, as this corrupts the XML content.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-card warn" style="margin-top:20px;">
+        <div class="card-label">Do Not Re-Save in Excel</div>
+        <p>The .xlsx file contains raw XML data, not a normal spreadsheet. Opening it in Excel and saving it again will destroy the XML formatting and the import will fail. Import the file into RightAngle directly from your Downloads folder.</p>
+      </div>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- ── Statuses ── -->
+    <section class="section" id="statuses">
+      <div class="section-label">Row Statuses</div>
+
+      <p>Every movement row has one of two statuses:</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num" style="background:transparent; border:1px solid var(--amber-dim); color:var(--amber-dim);">P</div>
+          <div class="step-body">
+            <strong><span class="badge-pending">PENDING</span></strong>
+            <p>The movement has been saved but not yet exported. It will be included in the next export. You can edit or delete pending rows.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num" style="background:transparent; border:1px solid #444; color:#737373;">S</div>
+          <div class="step-body">
+            <strong><span class="badge-sent">SENT</span></strong>
+            <p>The movement was included in a completed export. The row is dimmed and read-only. The export timestamp is shown below the badge. Sent rows are kept permanently for your records.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- ── FAQ ── -->
+    <section class="section" id="faq">
+      <div class="section-label">FAQ</div>
+
+      <h3>I added a row but the table shows "Connecting to SharePoint..."</h3>
+      <p>The page is still loading existing movements from SharePoint on startup. Wait a moment and the table will populate. If the error banner appears, check that you are logged into your SharePoint account and that the RA_Movements list exists on the site.</p>
+
+      <h3>I get a "Not authenticated" error</h3>
+      <p>The app must be opened from within SharePoint — navigate to the document library and click the file, rather than opening it from a local folder. SharePoint session cookies are required for the REST API to work.</p>
+
+      <h3>Claude couldn't extract a field from my PDF</h3>
+      <p>Some PDFs use scanned images rather than selectable text, which makes extraction harder. If a field is blank after parsing, type the value in manually before saving. You can also click <strong>Re-parse</strong> to try again with the same file.</p>
+
+      <h3>I exported by mistake — can I re-export?</h3>
+      <p>Once rows are marked SENT they cannot be re-exported from this tool. To re-import into RightAngle, use the previously downloaded file. If you have lost the file, contact your RightAngle administrator to delete the already-imported movements so they can be re-submitted.</p>
+
+      <h3>The ExternalDocumentNumber already exists in RightAngle</h3>
+      <p>RightAngle uses ExternalDocumentNumber to detect duplicates. If an import fails with a "duplicate document" error, the movement was already imported. Check whether the export was already processed before re-submitting.</p>
+
+      <h3>I need to change a movement after it was exported</h3>
+      <p>Sent rows are locked in this tool. To correct a movement that has already been imported into RightAngle, you will need to edit or reverse it directly in RightAngle. Ask your ETRM administrator if you are unsure how to do this.</p>
+    </section>
+
+    <hr class="divider" />
+
+    <div class="cta-row">
+      <a href="index.html" class="primary">Go to Manual Entry</a>
+      <a href="email-processor.html" class="ghost">Go to PDF Processor</a>
+    </div>
+
+  </main>
+</div>
+
+<script>
+</script>
+</body>
+</html>

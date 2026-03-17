@@ -52,9 +52,80 @@
       font-size: 12px;
       color: var(--text-dim);
     }
+    header nav {
+      margin-left: auto;
+      display: flex;
+      gap: 2px;
+      align-items: center;
+    }
+    header nav a {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--text-dim);
+      padding: 5px 12px;
+      border: 1px solid transparent;
+      border-radius: 2px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    header nav a:hover { color: var(--text); border-color: var(--border); }
+    header nav a.active { color: var(--amber); border-color: var(--amber-dim); }
 
     /* ── Layout ── */
     main { padding: 20px 24px; max-width: 1600px; }
+
+    /* ── SP Status Banner ── */
+    #sp-banner {
+      display: none;
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 8px 14px;
+      margin-bottom: 16px;
+      border-radius: 2px;
+      align-items: center;
+      gap: 10px;
+    }
+    #sp-banner.loading {
+      display: flex;
+      background: rgba(245,158,11,0.08);
+      border: 1px solid var(--amber-dim);
+      color: var(--amber);
+    }
+    #sp-banner.error {
+      display: flex;
+      background: rgba(239,68,68,0.08);
+      border: 1px solid #7f1d1d;
+      color: var(--danger);
+    }
+    #sp-banner-dismiss {
+      margin-left: auto;
+      background: none;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 0 2px;
+      line-height: 1;
+      font-family: var(--mono);
+      letter-spacing: normal;
+      text-transform: none;
+    }
+
+    /* ── Spinner ── */
+    .spinner {
+      display: inline-block;
+      width: 11px;
+      height: 11px;
+      border: 2px solid var(--amber-dim);
+      border-top-color: var(--amber);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
     /* ── Section headings ── */
     .section-label {
@@ -122,6 +193,11 @@
     .field select.error {
       border-color: var(--danger);
     }
+    .field input:disabled,
+    .field select:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
     .field select option { background: #111; }
 
     .form-divider {
@@ -155,7 +231,13 @@
       background: var(--amber);
       color: #0f0f0f;
     }
-    #btn-add:hover { background: #fbbf24; }
+    #btn-add:hover:not(:disabled) { background: #fbbf24; }
+    #btn-add:disabled {
+      background: var(--amber-dim);
+      color: #5a3d05;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
     #btn-clear {
       background: transparent;
       border: 1px solid var(--border);
@@ -164,10 +246,20 @@
     #btn-clear:hover { border-color: var(--text-dim); color: var(--text); }
 
     #form-error {
+      display: none;
+      margin-top: 10px;
+      padding: 10px 14px;
+      background: rgba(239,68,68,0.08);
+      border: 1px solid #7f1d1d;
+      border-left: 3px solid var(--danger);
       font-size: 12px;
       color: var(--danger);
       font-family: var(--mono);
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
     }
+    #form-error.visible { display: block; }
 
     /* ── Table section ── */
     #table-section { margin-bottom: 24px; }
@@ -249,13 +341,14 @@
       border: 1px solid var(--border);
       color: var(--text-dim);
     }
-    .btn-edit:hover { border-color: var(--amber); color: var(--amber); }
+    .btn-edit:hover:not(:disabled) { border-color: var(--amber); color: var(--amber); }
     .btn-delete {
       background: transparent;
       border: 1px solid var(--border);
       color: var(--text-dim);
     }
-    .btn-delete:hover { border-color: var(--danger); color: var(--danger); }
+    .btn-delete:hover:not(:disabled) { border-color: var(--danger); color: var(--danger); }
+    .btn-edit:disabled, .btn-delete:disabled { opacity: 0.4; cursor: not-allowed; }
 
     /* ── Sent row styling ── */
     tr.row-sent { opacity: 0.4; }
@@ -340,17 +433,30 @@
       margin-top: 14px;
       display: flex;
       gap: 10px;
+      align-items: center;
     }
     #btn-modal-save {
       background: var(--amber);
       color: #0f0f0f;
     }
-    #btn-modal-save:hover { background: #fbbf24; }
+    #btn-modal-save:hover:not(:disabled) { background: #fbbf24; }
+    #btn-modal-save:disabled {
+      background: var(--amber-dim);
+      color: #5a3d05;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
     #btn-modal-cancel {
       background: transparent;
       border: 1px solid var(--border);
       color: var(--text-dim);
     }
+    #modal-error {
+      font-size: 12px;
+      color: var(--danger);
+      font-family: var(--mono);
+    }
+
   </style>
 </head>
 <body>
@@ -358,10 +464,22 @@
 <header>
   <h1>RA Movement Entry</h1>
   <span>RightAngle ETRM Import Tool</span>
-  <span id="header-user" style="margin-left:auto; font-family:var(--mono); font-size:12px; color:var(--text-dim);"></span>
+  <nav>
+    <a href="index.html" class="active">Manual Entry</a>
+    <a href="email-processor.html">PDF Processor</a>
+    <a href="walkthrough.html">Guide</a>
+  </nav>
+  <span id="header-user" style="font-family:var(--mono); font-size:12px; color:var(--text-dim);"></span>
 </header>
 
 <main>
+
+  <!-- ── SP Status Banner ── -->
+  <div id="sp-banner">
+    <span class="spinner" id="sp-spinner"></span>
+    <span id="sp-banner-msg"></span>
+    <button id="sp-banner-dismiss" style="display:none;">&times;</button>
+  </div>
 
   <!-- ── Entry Form ── -->
   <section id="entry-form">
@@ -403,6 +521,10 @@
 
       <!-- Optional -->
       <div class="field">
+        <label for="f-MovDocDate">MovementDocumentDate</label>
+        <input type="date" id="f-MovDocDate" />
+      </div>
+      <div class="field">
         <label for="f-Type">Type</label>
         <select id="f-Type">
           <option value=""></option>
@@ -413,88 +535,16 @@
         </select>
       </div>
       <div class="field">
-        <label for="f-GrossVolume">GrossVolume</label>
-        <input type="number" id="f-GrossVolume" step="0.0001" placeholder="0.0000" />
-      </div>
-      <div class="field">
-        <label for="f-SpecificGravity">SpecificGravity</label>
-        <input type="number" id="f-SpecificGravity" step="0.0001" placeholder="" />
-      </div>
-      <div class="field">
-        <label for="f-APIGravity">APIGravity</label>
-        <input type="number" id="f-APIGravity" step="0.0001" placeholder="" />
-      </div>
-      <div class="field">
-        <label for="f-Status">Status</label>
-        <input type="text" id="f-Status" placeholder="" />
-      </div>
-      <div class="field">
-        <label for="f-IntDocNum">InternalDocumentNumber</label>
-        <input type="text" id="f-IntDocNum" placeholder="" />
-      </div>
-      <div class="field">
-        <label for="f-MovDocDate">MovementDocumentDate</label>
-        <input type="date" id="f-MovDocDate" />
-      </div>
-      <div class="field">
-        <label for="f-ReceiptDealNum">ReceiptDealNumber</label>
-        <input type="text" id="f-ReceiptDealNum" placeholder="" />
-      </div>
-      <div class="field">
-        <label for="f-ReceiptDealDetail">ReceiptDealDetail</label>
-        <input type="text" id="f-ReceiptDealDetail" placeholder="" />
-      </div>
-      <div class="field">
-        <label for="f-ReceiptBA">ReceiptBA</label>
-        <input type="text" id="f-ReceiptBA" placeholder="" />
-      </div>
-      <div class="field">
-        <label for="f-DeliveryDealNum">DeliveryDealNumber</label>
-        <input type="text" id="f-DeliveryDealNum" placeholder="" />
-      </div>
-      <div class="field">
-        <label for="f-DeliveryDealDetail">DeliveryDealDetail</label>
-        <input type="text" id="f-DeliveryDealDetail" placeholder="" />
-      </div>
-      <div class="field">
         <label for="f-DeliveryBA">DeliveryBA</label>
-        <input type="text" id="f-DeliveryBA" placeholder="" />
-      </div>
-      <div class="field">
-        <label for="f-TaxOrigin">TaxOrigin</label>
-        <input type="text" id="f-TaxOrigin" placeholder="" />
-      </div>
-      <div class="field">
-        <label for="f-TaxDest">TaxDestination</label>
-        <input type="text" id="f-TaxDest" placeholder="" />
-      </div>
-      <div class="field">
-        <label for="f-CarrierBA">CarrierBusinessAssociate</label>
-        <input type="text" id="f-CarrierBA" placeholder="" />
-      </div>
-      <div class="field">
-        <label for="f-LiftingNum">LiftingNumber</label>
-        <input type="text" id="f-LiftingNum" placeholder="" />
-      </div>
-      <div class="field">
-        <label for="f-ReasonCode">ReasonCode</label>
-        <input type="text" id="f-ReasonCode" placeholder="" />
-      </div>
-      <div class="field">
-        <label for="f-MovExpenses">MovementExpenses</label>
-        <input type="number" id="f-MovExpenses" step="0.01" placeholder="" />
-      </div>
-      <div class="field">
-        <label for="f-Notes">Notes</label>
-        <input type="text" id="f-Notes" placeholder="" />
+        <input type="text" id="f-DeliveryBA" placeholder="Counterparty / supplier" />
       </div>
     </div>
 
     <div class="form-actions">
       <button id="btn-add">+ Add Row</button>
       <button id="btn-clear">Clear</button>
-      <span id="form-error"></span>
     </div>
+    <div id="form-error"></div>
   </section>
 
   <!-- ── Table ── -->
@@ -531,101 +581,108 @@
     <div class="modal-actions">
       <button id="btn-modal-save">Save Changes</button>
       <button id="btn-modal-cancel">Cancel</button>
+      <span id="modal-error"></span>
     </div>
   </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script>
-// ── Column definitions ──────────────────────────────────────────────────────
+// ── Firebase Config ───────────────────────────────────────────────────────────
+firebase.initializeApp({
+  apiKey:            'AIzaSyBk5oxlIH3jhFPdkGFUrbMBv05wO2gpdeg',
+  authDomain:        'ra-movement-entry.firebaseapp.com',
+  projectId:         'ra-movement-entry',
+  storageBucket:     'ra-movement-entry.firebasestorage.app',
+  messagingSenderId: '718004979233',
+  appId:             '1:718004979233:web:1b2e317c0d5121a0a70560',
+});
+const db   = firebase.firestore();
+const COLL = db.collection('ra_movements');
+
+// ── Firestore CRUD ────────────────────────────────────────────────────────────
+async function dbGetAll() {
+  const snap = await COLL.orderBy('enteredAt', 'asc').get();
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+async function dbCreate(mov) {
+  const ref = await COLL.add(mov);
+  return { id: ref.id, ...mov };
+}
+
+async function dbUpdate(id, fields) {
+  await COLL.doc(id).update(fields);
+}
+
+async function dbDelete(id) {
+  await COLL.doc(id).delete();
+}
+
+// ── Status banner helpers ─────────────────────────────────────────────────────
+const spBanner  = document.getElementById('sp-banner');
+const spMsg     = document.getElementById('sp-banner-msg');
+const spSpinner = document.getElementById('sp-spinner');
+const spDismiss = document.getElementById('sp-banner-dismiss');
+
+spDismiss.addEventListener('click', () => {
+  spBanner.className = '';
+  spBanner.style.display = 'none';
+});
+
+function showLoading(msg) {
+  spBanner.className   = 'loading';
+  spMsg.textContent    = msg;
+  spSpinner.style.display = 'inline-block';
+  spDismiss.style.display = 'none';
+}
+
+function showSpError(msg) {
+  spBanner.className   = 'error';
+  spMsg.textContent    = msg;
+  spSpinner.style.display = 'none';
+  spDismiss.style.display = 'inline-block';
+}
+
+function hideSpBanner() {
+  spBanner.className      = '';
+  spBanner.style.display  = 'none';
+}
+
+// ── Column definitions ────────────────────────────────────────────────────────
 const COLUMNS = [
-  { key: 'ExternalDocumentNumber', label: 'ExternalDocumentNumber', type: 'text',   required: true  },
-  { key: 'MovementDate',           label: 'MovementDate',           type: 'datetime',required: true  },
-  { key: 'Location',               label: 'Location',               type: 'text',   required: true  },
-  { key: 'MovedProduct',           label: 'MovedProduct',           type: 'text',   required: true  },
-  { key: 'NetVolume',              label: 'NetVolume',              type: 'number', required: true,  decimals: 2 },
-  { key: 'VolumeUOM',              label: 'VolumeUOM',              type: 'select', required: true,  options: ['bbl','gal','mcf'] },
-  { key: 'Type',                   label: 'Type',                   type: 'select', required: false, options: ['','Production','Receipt','Delivery','Inventory'] },
-  { key: 'GrossVolume',            label: 'GrossVolume',            type: 'number', required: false, decimals: 4 },
-  { key: 'SpecificGravity',        label: 'SpecificGravity',        type: 'number', required: false },
-  { key: 'APIGravity',             label: 'APIGravity',             type: 'number', required: false },
-  { key: 'Status',                 label: 'Status',                 type: 'text',   required: false },
-  { key: 'InternalDocumentNumber', label: 'InternalDocumentNumber', type: 'text',   required: false },
-  { key: 'MovementDocumentDate',   label: 'MovementDocumentDate',   type: 'date',   required: false },
-  { key: 'ReceiptDealNumber',      label: 'ReceiptDealNumber',      type: 'text',   required: false },
-  { key: 'ReceiptDealDetail',      label: 'ReceiptDealDetail',      type: 'text',   required: false },
-  { key: 'ReceiptBA',              label: 'ReceiptBA',              type: 'text',   required: false },
-  { key: 'DeliveryDealNumber',     label: 'DeliveryDealNumber',     type: 'text',   required: false },
-  { key: 'DeliveryDealDetail',     label: 'DeliveryDealDetail',     type: 'text',   required: false },
-  { key: 'DeliveryBA',             label: 'DeliveryBA',             type: 'text',   required: false },
-  { key: 'TaxOrigin',              label: 'TaxOrigin',              type: 'text',   required: false },
-  { key: 'TaxDestination',         label: 'TaxDestination',         type: 'text',   required: false },
-  { key: 'CarrierBusinessAssociate',label:'CarrierBusinessAssociate',type:'text',   required: false },
-  { key: 'LiftingNumber',          label: 'LiftingNumber',          type: 'text',   required: false },
-  { key: 'ReasonCode',             label: 'ReasonCode',             type: 'text',   required: false },
-  { key: 'MovementExpenses',       label: 'MovementExpenses',       type: 'number', required: false, decimals: 2 },
-  { key: 'Notes',                  label: 'Notes',                  type: 'text',   required: false },
+  { key: 'ExternalDocumentNumber', label: 'ExternalDocumentNumber', type: 'text',    required: true  },
+  { key: 'MovementDate',           label: 'MovementDate',           type: 'datetime', required: true  },
+  { key: 'Location',               label: 'Location',               type: 'text',    required: true  },
+  { key: 'MovedProduct',           label: 'MovedProduct',           type: 'text',    required: true  },
+  { key: 'NetVolume',              label: 'NetVolume',              type: 'number',  required: true,  decimals: 2 },
+  { key: 'VolumeUOM',              label: 'VolumeUOM',              type: 'select',  required: true,  options: ['bbl','gal','mcf'] },
+  { key: 'MovementDocumentDate',   label: 'MovementDocumentDate',   type: 'date',    required: false },
+  { key: 'Type',                   label: 'Type',                   type: 'select',  required: false, options: ['','Production','Receipt','Delivery','Inventory'] },
+  { key: 'DeliveryBA',             label: 'DeliveryBA',             type: 'text',    required: false },
 ];
 
 const FIELD_MAP = {
-  'f-ExtDocNum':         'ExternalDocumentNumber',
-  'f-MovDate':           'MovementDate',
-  'f-Location':          'Location',
-  'f-MovedProduct':      'MovedProduct',
-  'f-NetVolume':         'NetVolume',
-  'f-VolumeUOM':         'VolumeUOM',
-  'f-Type':              'Type',
-  'f-GrossVolume':       'GrossVolume',
-  'f-SpecificGravity':   'SpecificGravity',
-  'f-APIGravity':        'APIGravity',
-  'f-Status':            'Status',
-  'f-IntDocNum':         'InternalDocumentNumber',
-  'f-MovDocDate':        'MovementDocumentDate',
-  'f-ReceiptDealNum':    'ReceiptDealNumber',
-  'f-ReceiptDealDetail': 'ReceiptDealDetail',
-  'f-ReceiptBA':         'ReceiptBA',
-  'f-DeliveryDealNum':   'DeliveryDealNumber',
-  'f-DeliveryDealDetail':'DeliveryDealDetail',
-  'f-DeliveryBA':        'DeliveryBA',
-  'f-TaxOrigin':         'TaxOrigin',
-  'f-TaxDest':           'TaxDestination',
-  'f-CarrierBA':         'CarrierBusinessAssociate',
-  'f-LiftingNum':        'LiftingNumber',
-  'f-ReasonCode':        'ReasonCode',
-  'f-MovExpenses':       'MovementExpenses',
-  'f-Notes':             'Notes',
+  'f-ExtDocNum':  'ExternalDocumentNumber',
+  'f-MovDate':    'MovementDate',
+  'f-Location':   'Location',
+  'f-MovedProduct':'MovedProduct',
+  'f-NetVolume':  'NetVolume',
+  'f-VolumeUOM':  'VolumeUOM',
+  'f-MovDocDate': 'MovementDocumentDate',
+  'f-Type':       'Type',
+  'f-DeliveryBA': 'DeliveryBA',
 };
 
-// ── localStorage ─────────────────────────────────────────────────────────────
-const LS_MOVEMENTS = 'ra_movements';
-const LS_USERNAME  = 'ra_username';
+const LS_USERNAME = 'ra_username';
 
-function saveToStorage() {
-  localStorage.setItem(LS_MOVEMENTS, JSON.stringify(movements));
-}
-
-function loadFromStorage() {
-  try {
-    const raw = localStorage.getItem(LS_MOVEMENTS);
-    return raw ? JSON.parse(raw) : [];
-  } catch { return []; }
-}
-
-function initUsername() {
-  let name = localStorage.getItem(LS_USERNAME);
-  if (!name) {
-    name = prompt('Welcome! Please enter your name:') || 'Unknown';
-    localStorage.setItem(LS_USERNAME, name);
-  }
-  document.getElementById('header-user').textContent = name;
-  return name;
-}
-
-// ── State ────────────────────────────────────────────────────────────────────
-let movements = loadFromStorage();
+// ── State ─────────────────────────────────────────────────────────────────────
+let movements = [];
 let username  = '';
 let editId    = null;
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
 function formatMovementDate(isoStr) {
   if (!isoStr) return '';
   const d = new Date(isoStr);
@@ -652,7 +709,18 @@ function isoDateStr(d) {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
-// ── Read form ────────────────────────────────────────────────────────────────
+// ── Username ──────────────────────────────────────────────────────────────────
+function initUsername() {
+  let name = localStorage.getItem(LS_USERNAME);
+  if (!name) {
+    name = prompt('Welcome! Please enter your name:') || 'Unknown';
+    localStorage.setItem(LS_USERNAME, name);
+  }
+  document.getElementById('header-user').textContent = name;
+  return name;
+}
+
+// ── Read form ─────────────────────────────────────────────────────────────────
 function readForm(prefix) {
   const data = {};
   if (prefix === 'modal-') {
@@ -711,7 +779,6 @@ function renderTable() {
     const tr   = document.createElement('tr');
     if (sent) tr.classList.add('row-sent');
 
-    // Actions cell
     const tdAct = document.createElement('td');
     tdAct.className = 'actions';
     if (!sent) {
@@ -722,15 +789,14 @@ function renderTable() {
       const btnDel = document.createElement('button');
       btnDel.className   = 'btn-delete';
       btnDel.textContent = 'Del';
-      btnDel.onclick     = () => deleteRow(row.id);
+      btnDel.onclick     = () => deleteRow(row.id, btnDel, btnEdit);
       tdAct.appendChild(btnEdit);
       tdAct.appendChild(btnDel);
     }
     tr.appendChild(tdAct);
 
-    // Status badge
     const tdStatus = document.createElement('td');
-    const badge = document.createElement('span');
+    const badge    = document.createElement('span');
     badge.className   = sent ? 'badge-sent' : 'badge-pending';
     badge.textContent = sent ? 'SENT' : 'PENDING';
     tdStatus.appendChild(badge);
@@ -742,7 +808,6 @@ function renderTable() {
     }
     tr.appendChild(tdStatus);
 
-    // Metadata: enteredBy, enteredAt
     const tdBy = document.createElement('td');
     tdBy.textContent = row.enteredBy || '';
     tr.appendChild(tdBy);
@@ -751,12 +816,11 @@ function renderTable() {
     tdAt.textContent = row.enteredAt ? new Date(row.enteredAt).toLocaleString() : '';
     tr.appendChild(tdAt);
 
-    // RA fields
     COLUMNS.forEach(col => {
-      const td  = document.createElement('td');
-      let val   = row[col.key] || '';
-      if (col.type === 'datetime')                          val = formatMovementDate(val);
-      else if (col.type === 'date')                         val = formatDocDate(val);
+      const td = document.createElement('td');
+      let val  = row[col.key] || '';
+      if (col.type === 'datetime')                           val = formatMovementDate(val);
+      else if (col.type === 'date')                          val = formatDocDate(val);
       else if (col.type === 'number' && col.decimals != null) val = formatNumber(val, col.decimals);
       td.textContent = val;
       tr.appendChild(td);
@@ -767,25 +831,23 @@ function renderTable() {
 }
 
 // ── Add row ───────────────────────────────────────────────────────────────────
-document.getElementById('btn-add').addEventListener('click', () => {
+document.getElementById('btn-add').addEventListener('click', async () => {
   const fields = readForm('');
   const errors = validateData(fields);
-  const errEl  = document.getElementById('form-error');
 
   document.querySelectorAll('#entry-form input.error, #entry-form select.error')
     .forEach(el => el.classList.remove('error'));
 
   if (errors.length > 0) {
-    errEl.textContent = 'Required: ' + errors.join(', ');
+    showFormError('Missing required fields:\n' + errors.map(e => '  • ' + e).join('\n'));
     Object.entries(FIELD_MAP).forEach(([fieldId, colKey]) => {
       if (errors.includes(colKey)) document.getElementById(fieldId)?.classList.add('error');
     });
     return;
   }
 
-  errEl.textContent = '';
+  hideFormError();
   const movement = {
-    id:          crypto.randomUUID(),
     status:      'pending',
     enteredBy:   username,
     enteredAt:   new Date().toISOString(),
@@ -793,27 +855,68 @@ document.getElementById('btn-add').addEventListener('click', () => {
     sentAt:      null,
     ...fields,
   };
-  movements.push(movement);
-  saveToStorage();
-  renderTable();
-  clearForm();
+
+  const btn = document.getElementById('btn-add');
+  btn.disabled    = true;
+  btn.textContent = 'Saving...';
+  showLoading('Saving movement...');
+
+  try {
+    const created = await dbCreate(movement);
+    movements.push(created);
+    renderTable();
+    clearForm();
+    hideSpBanner();
+  } catch (err) {
+    console.error('dbCreate failed:', err);
+    showFormError('Error saving: ' + err.message);
+    showSpError(err.message);
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = '+ Add Row';
+  }
 });
 
 // ── Clear form ────────────────────────────────────────────────────────────────
+// ── Form error helpers ────────────────────────────────────────────────────────
+function showFormError(msg) {
+  const el = document.getElementById('form-error');
+  el.textContent = msg;
+  el.classList.add('visible');
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function hideFormError() {
+  const el = document.getElementById('form-error');
+  el.textContent = '';
+  el.classList.remove('visible');
+}
+
 function clearForm() {
   Object.keys(FIELD_MAP).forEach(fieldId => {
     const el = document.getElementById(fieldId);
     if (el) { el.value = ''; el.classList.remove('error'); }
   });
-  document.getElementById('form-error').textContent = '';
+  hideFormError();
 }
 document.getElementById('btn-clear').addEventListener('click', clearForm);
 
 // ── Delete row ────────────────────────────────────────────────────────────────
-function deleteRow(id) {
-  movements = movements.filter(r => r.id !== id);
-  saveToStorage();
-  renderTable();
+async function deleteRow(id, btnDel, btnEdit) {
+  if (btnDel) { btnDel.disabled = true; btnDel.textContent = '...'; }
+  if (btnEdit) btnEdit.disabled = true;
+  showLoading('Deleting...');
+
+  try {
+    await dbDelete(id);
+    movements = movements.filter(r => r.id !== id);
+    renderTable();
+    hideSpBanner();
+  } catch (err) {
+    showSpError('Delete failed: ' + err.message);
+    if (btnDel) { btnDel.disabled = false; btnDel.textContent = 'Del'; }
+    if (btnEdit) btnEdit.disabled = false;
+  }
 }
 
 // ── Modal ─────────────────────────────────────────────────────────────────────
@@ -822,6 +925,7 @@ function openModal(id) {
   const row  = movements.find(r => r.id === id);
   const grid = document.getElementById('modal-grid');
   grid.innerHTML = '';
+  document.getElementById('modal-error').textContent = '';
 
   COLUMNS.forEach((col, i) => {
     const div = document.createElement('div');
@@ -849,8 +953,8 @@ function openModal(id) {
     }
     el.id = 'modal-' + col.key;
     div.appendChild(el);
-
     grid.appendChild(div);
+
     if (i === 5) {
       const hr = document.createElement('hr');
       hr.className = 'form-divider';
@@ -872,21 +976,37 @@ document.getElementById('modal-overlay').addEventListener('click', e => {
   if (e.target === document.getElementById('modal-overlay')) closeModal();
 });
 
-document.getElementById('btn-modal-save').addEventListener('click', () => {
-  const fields = readForm('modal-');
-  const errors = validateData(fields);
+document.getElementById('btn-modal-save').addEventListener('click', async () => {
+  const fields   = readForm('modal-');
+  const errors   = validateData(fields);
+  const modalErr = document.getElementById('modal-error');
+
   if (errors.length > 0) {
-    alert('Required fields missing: ' + errors.join(', '));
+    modalErr.textContent = 'Required: ' + errors.join(', ');
     return;
   }
+  modalErr.textContent = '';
+
   const idx = movements.findIndex(r => r.id === editId);
-  if (idx !== -1) {
-    // Preserve all metadata, only overwrite RA fields
+  if (idx === -1) { closeModal(); return; }
+
+  const btn = document.getElementById('btn-modal-save');
+  btn.disabled    = true;
+  btn.textContent = 'Saving...';
+
+  try {
+    await dbUpdate(editId, fields);
     movements[idx] = { ...movements[idx], ...fields };
-    saveToStorage();
+    renderTable();
+    closeModal();
+    hideSpBanner();
+  } catch (err) {
+    modalErr.textContent = 'Error: ' + err.message;
+    showSpError(err.message);
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = 'Save Changes';
   }
-  renderTable();
-  closeModal();
 });
 
 // ── XML Export ────────────────────────────────────────────────────────────────
@@ -935,43 +1055,43 @@ function buildXml(rows) {
     xml += '  <Row>\n';
     xml += tag('ExternalDocumentNumber', row.ExternalDocumentNumber);
     xml += tag('Line_x0023_', String(idx + 1));
-    xml += tag('Status', row.Status);
+    xml += tag('Status', '');
     xml += tag('MovementDate', fmtMovDateXml(row.MovementDate));
     xml += tag('Location', row.Location);
     xml += tag('MovedProduct', row.MovedProduct);
     xml += tag('Type', row.Type);
     xml += tag('NetVolume', fmtVol(row.NetVolume, 2));
-    xml += tag('GrossVolume', fmtVol(row.GrossVolume, 4));
+    xml += tag('GrossVolume', '');
     xml += tag('VolumeUOM', row.VolumeUOM);
     xml += tag('NetMass', '');
     xml += tag('GrossMass', '');
     xml += `    <MassUOM>lbs</MassUOM>\n`;
-    xml += tag('SpecificGravity', row.SpecificGravity);
-    xml += tag('APIGravity', row.APIGravity);
-    xml += tag('ReceiptDealNumber', row.ReceiptDealNumber);
-    xml += tag('ReceiptDealDetail', row.ReceiptDealDetail);
-    xml += tag('ReceiptBA', row.ReceiptBA);
-    xml += tag('DeliveryDealNumber', row.DeliveryDealNumber);
-    xml += tag('DeliveryDealDetail', row.DeliveryDealDetail);
+    xml += tag('SpecificGravity', '');
+    xml += tag('APIGravity', '');
+    xml += tag('ReceiptDealNumber', '');
+    xml += tag('ReceiptDealDetail', '');
+    xml += tag('ReceiptBA', '');
+    xml += tag('DeliveryDealNumber', '');
+    xml += tag('DeliveryDealDetail', '');
     xml += tag('DeliveryBA', row.DeliveryBA);
-    xml += tag('MovementExpenses', row.MovementExpenses !== '' && row.MovementExpenses != null ? row.MovementExpenses : '0');
+    xml += tag('MovementExpenses', '0');
     xml += tag('LCLeaseName', '');
     xml += tag('LCLeaseNumber', '');
     xml += tag('LeaseProduct', '');
     xml += tag('PrimaryProvisionValueOverride', '');
     xml += tag('SecondaryProvisionValueOverride', '');
     xml += tag('Description', '');
-    xml += tag('TaxOrigin', row.TaxOrigin);
-    xml += tag('TaxDestination', row.TaxDestination);
-    xml += tag('CarrierBusinessAssociate', row.CarrierBusinessAssociate);
+    xml += tag('TaxOrigin', '');
+    xml += tag('TaxDestination', '');
+    xml += tag('CarrierBusinessAssociate', '');
     xml += tag('LabAnalysis', '');
     xml += tag('LiftingNumber', '');
     xml += tag('AncillaryNumber', '');
     xml += `    <AutomatchStatus>Successfully Automatched</AutomatchStatus>\n`;
     xml += tag('LoadMeasurementType', '');
-    xml += tag('ReasonCode', row.ReasonCode);
+    xml += tag('ReasonCode', '');
     xml += tag('Notes', '');
-    xml += tag('InternalDocumentNumber', row.InternalDocumentNumber);
+    xml += tag('InternalDocumentNumber', '');
     xml += tag('MovementDocumentDate', formatDocDate(row.MovementDocumentDate));
     xml += '  </Row>\n';
   });
@@ -979,10 +1099,11 @@ function buildXml(rows) {
   return xml;
 }
 
-document.getElementById('btn-export').addEventListener('click', () => {
+document.getElementById('btn-export').addEventListener('click', async () => {
   const pending = movements.filter(r => r.status === 'pending');
   if (pending.length === 0) return;
 
+  // Download file immediately — don't block on SP updates
   const xmlString = buildXml(pending);
   const blob = new Blob([xmlString], { type: 'application/vnd.ms-excel' });
   const url  = URL.createObjectURL(blob);
@@ -992,21 +1113,56 @@ document.getElementById('btn-export').addEventListener('click', () => {
   a.click();
   URL.revokeObjectURL(url);
 
-  // Mark exported rows as sent
-  const batch    = 'BATCH-' + Date.now();
-  const sentAt   = new Date().toISOString();
+  // Mark as sent in SP
+  const btn = document.getElementById('btn-export');
+  btn.disabled    = true;
+  btn.textContent = 'Marking Sent...';
+  showLoading(`Marking ${pending.length} movements as sent...`);
+
+  const batch       = 'BATCH-' + Date.now();
+  const sentAt      = new Date().toISOString();
   const exportedIds = new Set(pending.map(r => r.id));
-  movements = movements.map(r =>
-    exportedIds.has(r.id) ? { ...r, status: 'sent', sentAt, exportBatch: batch } : r
-  );
-  saveToStorage();
-  renderTable();
+
+  try {
+    await Promise.all(
+      pending.map(r => dbUpdate(r.id, { status: 'sent', sentAt, exportBatch: batch }))
+    );
+    movements = movements.map(r =>
+      exportedIds.has(r.id) ? { ...r, status: 'sent', sentAt, exportBatch: batch } : r
+    );
+    renderTable();
+    hideSpBanner();
+  } catch (err) {
+    showSpError('Export marking failed: ' + err.message + ' — file was downloaded but some rows may still show as pending.');
+    try {
+      movements = await dbGetAll();
+      renderTable();
+    } catch { /* ignore */ }
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = 'Export Pending (.xlsx)';
+  }
 });
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 username = initUsername();
 buildHeader();
 renderTable();
+
+(async () => {
+  const empty = document.getElementById('empty-state');
+  empty.textContent = 'Connecting to Firebase...';
+  showLoading('Loading movements from Firebase...');
+
+  try {
+    movements = await dbGetAll();
+    renderTable();
+    hideSpBanner();
+  } catch (err) {
+    empty.textContent = 'Could not load from Firebase. See error above.';
+    showSpError(err.message);
+  }
+})();
 </script>
 </body>
 </html>
