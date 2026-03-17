@@ -344,6 +344,11 @@
 
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script type="importmap">{"imports": {"@anthropic-ai/sdk": "https://esm.sh/@anthropic-ai/sdk"}}</script>
+<script type="module">
+import Anthropic from '@anthropic-ai/sdk';
+window._anthropic = Anthropic;
+</script>
 <script>
 // ── Firebase Config ───────────────────────────────────────────────────────────
 firebase.initializeApp({
@@ -479,34 +484,26 @@ If a field cannot be found, use null.
 Return ONLY the JSON object, no explanation.`;
 
   try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key':                        apiKey,
-        'anthropic-version':                '2023-06-01',
-        'anthropic-dangerous-direct-browser-calls': 'true',
-        'content-type':                     'application/json',
-      },
-      body: JSON.stringify({
-        model: CLAUDE_MODEL,
-        max_tokens: 512,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
-            { type: 'text', text: prompt },
-          ],
-        }],
-      }),
-    });
-
-    if (!resp.ok) {
-      const err = await resp.json().catch(() => ({}));
-      throw new Error(err?.error?.message || `API error ${resp.status}`);
+    // Wait for Anthropic SDK to load (module script runs async)
+    let attempts = 0;
+    while (!window._anthropic && attempts++ < 20) {
+      await new Promise(r => setTimeout(r, 100));
     }
+    if (!window._anthropic) throw new Error('Anthropic SDK failed to load');
 
-    const result = await resp.json();
-    const text   = result.content?.[0]?.text || '';
+    const client = new window._anthropic({ apiKey, dangerouslyAllowBrowser: true });
+    const result = await client.messages.create({
+      model: CLAUDE_MODEL,
+      max_tokens: 512,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
+          { type: 'text', text: prompt },
+        ],
+      }],
+    });
+    const text = result.content?.[0]?.text || '';
 
     // Extract JSON from response
     const match = text.match(/\{[\s\S]*\}/);
