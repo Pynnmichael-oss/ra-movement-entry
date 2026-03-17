@@ -344,11 +344,6 @@
 
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-<script type="importmap">{"imports": {"@anthropic-ai/sdk": "https://esm.sh/@anthropic-ai/sdk"}}</script>
-<script type="module">
-import Anthropic from '@anthropic-ai/sdk';
-window._anthropic = Anthropic;
-</script>
 <script>
 // ── Firebase Config ───────────────────────────────────────────────────────────
 firebase.initializeApp({
@@ -368,9 +363,9 @@ async function dbCreate(mov) {
 }
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-const LS_USERNAME = 'ra_username';
-const LS_API_KEY  = 'ra_api_key';
-const CLAUDE_MODEL = 'claude-sonnet-4-20250514';
+const LS_USERNAME   = 'ra_username';
+const LS_API_KEY    = 'ra_api_key';
+const PARSE_URL     = 'https://us-central1-michael-new-website.cloudfunctions.net/parseMovement';
 
 // ── State ─────────────────────────────────────────────────────────────────────
 let selectedFile = null;
@@ -468,50 +463,18 @@ btnParse.addEventListener('click', async () => {
 
   parseStatus('Sending to Claude AI...', 'loading');
 
-  const prompt = `You are parsing a petroleum movement document (delivery ticket, invoice, or statement).
-
-Extract the following fields and return ONLY a JSON object with these exact keys:
-- ExternalDocumentNumber: document or ticket number (string)
-- MovementDate: date and time of the movement in format YYYY-MM-DDTHH:mm (string, use T00:00 if no time given)
-- MovementDocumentDate: document date in format YYYY-MM-DD (string, same as MovementDate date if not separately specified)
-- Location: facility, tank, or location name (string)
-- MovedProduct: product name e.g. Crude Oil, Gasoline, Diesel, Natural Gas (string)
-- NetVolume: numeric volume as a number (no commas or units)
-- DeliveryBA: supplier, carrier, or counterparty name (string)
-
-If a field cannot be found, use null.
-
-Return ONLY the JSON object, no explanation.`;
-
   try {
-    // Wait for Anthropic SDK to load (module script runs async)
-    let attempts = 0;
-    while (!window._anthropic && attempts++ < 20) {
-      await new Promise(r => setTimeout(r, 100));
-    }
-    if (!window._anthropic) throw new Error('Anthropic SDK failed to load');
-
-    const client = new window._anthropic({ apiKey, dangerouslyAllowBrowser: true });
-    const result = await client.messages.create({
-      model: CLAUDE_MODEL,
-      max_tokens: 512,
-      messages: [{
-        role: 'user',
-        content: [
-          { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
-          { type: 'text', text: prompt },
-        ],
-      }],
+    const resp = await fetch(PARSE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pdfBase64: base64, apiKey }),
     });
-    const text = result.content?.[0]?.text || '';
-
-    // Extract JSON from response
-    const match = text.match(/\{[\s\S]*\}/);
-    if (!match) throw new Error('No JSON found in response');
-
-    parsedData = JSON.parse(match[0]);
+    const json = await resp.json();
+    if (!resp.ok) throw new Error(json.error || `Server error ${resp.status}`);
+    parsedData = json;
     parseStatus('Parsed successfully.', 'done');
     showPreview(parsedData);
+    btnParse.disabled = false;
   } catch (err) {
     parseStatus('Error: ' + err.message, 'error');
     btnParse.disabled = false;
