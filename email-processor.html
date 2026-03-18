@@ -99,22 +99,7 @@
       border-bottom: 1px solid var(--border);
     }
 
-    /* ── API Key ── */
-    .api-key-row {
-      display: flex;
-      gap: 10px;
-      align-items: flex-end;
-      flex-wrap: wrap;
-    }
     .field { display: flex; flex-direction: column; gap: 6px; flex: 1; }
-    .field label {
-      font-family: var(--mono);
-      font-size: 10px;
-      font-weight: 500;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--text-dim);
-    }
     input, select {
       background: var(--bg);
       border: 1px solid var(--border);
@@ -148,10 +133,6 @@
       font-weight: 600;
     }
     .btn-primary:hover:not(:disabled) { background: #d97706; border-color: #d97706; color: #000; }
-
-    #api-key-status { font-family: var(--mono); font-size: 12px; color: var(--text-dim); }
-    #api-key-status.saved  { color: var(--success); }
-    #api-key-status.error  { color: var(--danger); }
 
     /* ── Drop zone ── */
     #drop-zone {
@@ -288,19 +269,6 @@
 
 <main>
 
-  <!-- ── API Key ── -->
-  <section class="card" id="api-key-section">
-    <div class="section-label">Anthropic API Key</div>
-    <div class="api-key-row">
-      <div class="field" style="max-width:560px;">
-        <label for="api-key-input">API Key</label>
-        <input type="password" id="api-key-input" placeholder="sk-ant-api03-..." autocomplete="off" />
-      </div>
-      <button class="btn-primary" id="btn-save-key">Save Key</button>
-      <span id="api-key-status"></span>
-    </div>
-  </section>
-
   <!-- ── Upload ── -->
   <section class="card" id="upload-section">
     <div class="section-label">Upload Petroleum Statement (PDF)</div>
@@ -363,9 +331,8 @@ async function dbCreate(mov) {
 }
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-const LS_USERNAME   = 'ra_username';
-const LS_API_KEY    = 'ra_api_key';
-const PARSE_URL     = 'https://us-central1-michael-new-website.cloudfunctions.net/parseMovement';
+const LS_USERNAME = 'ra_username';
+const PARSE_URL   = 'https://us-central1-michael-new-website.cloudfunctions.net/parseMovement';
 
 // ── State ─────────────────────────────────────────────────────────────────────
 let selectedFile = null;
@@ -378,32 +345,6 @@ if (!username) {
   localStorage.setItem(LS_USERNAME, username);
 }
 document.getElementById('header-user').textContent = username;
-
-// ── API Key ───────────────────────────────────────────────────────────────────
-const apiKeyInput  = document.getElementById('api-key-input');
-const btnSaveKey   = document.getElementById('btn-save-key');
-const apiKeyStatus = document.getElementById('api-key-status');
-
-function loadApiKey() {
-  const stored = localStorage.getItem(LS_API_KEY) || '';
-  apiKeyInput.value = stored;
-  if (stored) {
-    apiKeyStatus.textContent = 'Key loaded';
-    apiKeyStatus.className = 'saved';
-  }
-}
-
-btnSaveKey.addEventListener('click', () => {
-  const key = apiKeyInput.value.trim();
-  if (!key.startsWith('sk-ant-')) {
-    apiKeyStatus.textContent = 'Invalid key format';
-    apiKeyStatus.className = 'error';
-    return;
-  }
-  localStorage.setItem(LS_API_KEY, key);
-  apiKeyStatus.textContent = 'Saved';
-  apiKeyStatus.className = 'saved';
-});
 
 // ── File Upload ───────────────────────────────────────────────────────────────
 const fileInput    = document.getElementById('file-input');
@@ -441,11 +382,6 @@ function parseStatus(msg, cls) {
 
 // ── Parse ─────────────────────────────────────────────────────────────────────
 btnParse.addEventListener('click', async () => {
-  const apiKey = localStorage.getItem(LS_API_KEY) || apiKeyInput.value.trim();
-  if (!apiKey) {
-    parseStatus('Enter and save your Anthropic API key first.', 'error');
-    return;
-  }
   if (!selectedFile) return;
 
   btnParse.disabled = true;
@@ -467,7 +403,7 @@ btnParse.addEventListener('click', async () => {
     const resp = await fetch(PARSE_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pdfBase64: base64, apiKey }),
+      body: JSON.stringify({ pdfBase64: base64 }),
     });
     const json = await resp.json();
     if (!resp.ok) throw new Error(json.error || `Server error ${resp.status}`);
@@ -584,8 +520,6 @@ document.getElementById('btn-save-movement').addEventListener('click', async () 
   }
 });
 
-// ── Init ──────────────────────────────────────────────────────────────────────
-loadApiKey();
 </script>
 </body>
 </html>
