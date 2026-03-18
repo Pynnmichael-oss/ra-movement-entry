@@ -5,17 +5,23 @@ const Anthropic = require('@anthropic-ai/sdk');
 
 const ANTHROPIC_API_KEY = defineSecret('ANTHROPIC_API_KEY');
 
-const PROMPT = `You are parsing a petroleum movement document (delivery ticket, invoice, or statement).
+const PROMPT = `You are extracting structured data from a petroleum movement document.
+
+The most common document type is a TMS7 terminal ticket, but you may also receive delivery tickets, terminal receipts, invoices, bills of lading, pipeline statements, inventory reports, or other petroleum industry documents. Field names and layouts vary by document type — use context clues to map values to the correct output fields.
+
 Extract the following fields and return ONLY a JSON object with these exact keys:
-- ExternalDocumentNumber: document or ticket number (string)
-- MovementDate: date and time of the movement in format YYYY-MM-DDTHH:mm (string, use T00:00 if no time given)
-- MovementDocumentDate: document date in format YYYY-MM-DD (string, same as MovementDate date if not separately specified)
-- Location: facility, tank, or location name (string)
-- MovedProduct: product name e.g. Crude Oil, Gasoline, Diesel, Natural Gas (string)
-- NetVolume: numeric volume as a number (no commas or units)
-- DeliveryBA: supplier, carrier, or counterparty name (string)
-If a field cannot be found, use null.
-Return ONLY the JSON object, no explanation.`;
+
+- ExternalDocumentNumber: the primary document identifier — may appear as ticket number, document number, BOL number, invoice number, reference number, confirmation number, or similar
+- MovementDate: the date and time the physical movement or delivery occurred — may appear as load date, delivery date, ship date, movement date, or transaction date. Format: YYYY-MM-DDTHH:mm (use T00:00 if no time is given)
+- MovementDocumentDate: the date printed on the document itself — may differ from MovementDate. If not separately specified, use the same date as MovementDate. Format: YYYY-MM-DD
+- Location: the facility, terminal, tank farm, pipeline station, or site name — may appear as terminal, origin, destination, facility, plant, or location
+- MovedProduct: the petroleum product name — may appear as product, material, commodity, or grade (e.g. Crude Oil, Gasoline, CBOB, Diesel, Jet Fuel, Fuel Oil, NGL, Propane)
+- NetVolume: the net volume as a plain number only, no commas or units (e.g. 125000) — may appear as net volume, net quantity, net bbls, or similar; prefer net over gross if both present
+- DeliveryBA: the counterparty business associate — may appear as supplier, carrier, shipper, consignee, buyer, seller, transporter, or company name
+
+If a field truly cannot be determined from the document, return null for that field.
+
+Return ONLY the JSON object, no explanation, no markdown.`;
 
 exports.parseMovement = onRequest({ secrets: [ANTHROPIC_API_KEY] }, (req, res) => {
   cors(req, res, async () => {
